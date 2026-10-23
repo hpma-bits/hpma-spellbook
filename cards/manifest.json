@@ -1,7 +1,21 @@
 {
   "schema_version": 1,
   "data_version": "20261005",
+  "generated_at": "2026-10-05T16:29:54+08:00",
   "dataset": "cards",
+  "locales": [
+    "zh",
+    "en"
+  ],
+  "face_attrs": [
+    "hp",
+    "damage",
+    "shield",
+    "duration"
+  ],
+  "image_spec": "375x500 RGBA PNG",
+  "webp_images": "images_webp/",
+  "frame_spec": "品质边框（书页正框）frames/frame_{rarity}.png （208x272 RGBA）：inner=内窗矩形 [x,y,w,h]，卡面 cover-fit 填满 inner（居中裁切），框图叠满画布",
   "counts": {
     "cards": 141
   },

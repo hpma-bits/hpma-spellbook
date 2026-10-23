@@ -1,16 +1,18 @@
 {
   "schema_version": 1,
   "data_version": "20261005",
+  "generated_at": "2026-10-05T16:29:54+08:00",
   "dataset": "echoes",
+  "locales": [
+    "zh",
+    "en"
+  ],
+  "image_spec": "回响图标 PNG（image 原图直出，icon_huixiang_<角色拼音>_00<品质1..4/进化5> 命名，按源文件名去重；另含四品质光环）",
+  "webp_images": "images_webp/",
   "counts": {
     "echoes": 184,
     "characters": 46,
-    "affixes": 270,
-    "icons": 76,
-    "icons_webp": 76,
-    "en_name": 183,
-    "en_desc": 184,
-    "dangling_text_keys": 38
+    "affixes": 270
   },
   "coverage": {
     "echoes": 184,
@@ -19,7 +21,6 @@
     "icons": 76,
     "icons_webp": 76,
     "en_name": 183,
-    "en_desc": 184,
     "dangling_text_keys": 38,
     "missing_icons": [
       "4131.png",

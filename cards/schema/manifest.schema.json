@@ -1,49 +1,315 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "HPMA spellbook 数据仓模块 manifest.json（cards / echoes 通用契约）",
-  "description": "hpma-spellbook 专用数据仓的模块清单契约。本仓由（ 私有仓）按模块发布：cards/ 与 echoes/ 一等平级，各自独立 (schema, data) 版本轴。manifest 的 schema_version 从 1 重起（混合 manifest 契约语义无法按模块继承）；数据文件内嵌的 schema_version/data_version 属数据自身契约，由 schema/cards.schema.json 与 schema/echoes.schema.json 描述，与本文件是两条轴。本文件在两模块各放一份（schema/manifest.schema.json），内容完全相同。",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["schema_version", "data_version", "dataset", "counts", "coverage", "lineage"],
-  "properties": {
-    "schema_version": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "模块 manifest 契约版本，本仓从 1 重起；仅当 manifest 结构变更（消费端要改代码）时 +1，热更加内容只动 data_version"
-    },
-    "data_version": {
-      "type": "string",
-      "pattern": "^\\d{8}$",
-      "description": "游戏内容刷新版本 YYYYMMDD（字符串形式；与数据文件内嵌的整型 data_version 同值同源，如 \"20261005\"）"
-    },
-    "dataset": {
-      "enum": ["cards", "echoes"],
-      "description": "本 manifest 所属模块 id，与所在模块目录名（cards/、echoes/）一致；模块目录即命名空间"
-    },
-    "counts": {
-      "type": "object",
-      "minProperties": 1,
-      "additionalProperties": { "type": "integer", "minimum": 0 },
-      "description": "模块主实体条数（机器可读索引，承自旧包 manifest.datasets 注册表的 count）。约定取值：cards 模块 = {\"cards\": <卡数>}；echoes 模块 = {\"echoes\": <回响数>, \"characters\": <图鉴角色数>, \"affixes\": <词缀数>, \"icons\": <images/ 张数>, \"icons_webp\": <images_webp/ 张数>, \"en_name\": <有英文名的回响数>, \"en_desc\": <有英文主描述的回响数>, \"dangling_text_keys\": <悬空语言键数>}（即旧包 coverage.echoes 的全部整型项）"
-    },
-    "coverage": {
-      "type": "object",
-      "description": "覆盖率/质量统计，宽松 object 不逐键断言（各模块键集随数据集自由扩展）：cards 模块为旧包 coverage 的 cards 子树（cards/images/images_webp/en_name/en_desc/en_quote/en_tags/en_stats/missing_images）；echoes 模块为旧包 coverage.echoes 子树原样（echoes/characters/affixes/icons/icons_webp/en_name/en_desc/dangling_text_keys/missing_icons）。语义沿用旧包口径：icons 指本模块 images/ 张数（旧 echo_images/），icons_webp 指 images_webp/ 张数，missing_icons 为游戏内寻址失败的图标源路径"
-    },
-    "lineage": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["successor_of_tag", "predecessor_repo"],
-      "properties": {
-        "successor_of_tag": {
-          "type": "string",
-          "description": ""
-        },
-        "predecessor_repo": {
-          "type": "string",
-          "description": ""
-        }
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/schema/manifest.schema.json",
+ "title": "HPMA spellbook 数据包模块级 manifest.json（cards / echoes 共用同一份 schema）",
+ "description": "2026-10 拆分契约：旧混合单轴包（spellbook-v8.x，cards+echoes 同包同轴）退役，hpma-bits/hpma-spellbook 仓改为 cards / echoes 两个平级模块，各自独立版本轴与 manifest。本文件约束任一模块目录下的 manifest.json：schema_version 从拆分起从 1 重起（不继承旧混合轴的 8）；data_version 为日期字符串 YYYYMMDD（数据文件内仍为整数）；counts=数据文件主实体条数注册表（取代旧 datasets 注册表）；coverage=旧混合 manifest coverage 的本模块子树，语义原样发布 tag = cards-v{schema}.{data}.0 / echoes-v{schema}.{data}.0。",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema_version",
+  "data_version",
+  "generated_at",
+  "dataset",
+  "counts",
+  "coverage",
+  "lineage"
+ ],
+ "properties": {
+  "schema_version": {
+   "type": "integer",
+   "minimum": 1,
+   "description": "数据结构版本（模块独立版本轴，拆分起从 1 重起），与该模块数据文件一致"
+  },
+  "data_version": {
+   "type": "string",
+   "pattern": "^\\d{8}$",
+   "description": "游戏内容刷新版本，日期 YYYYMMDD（manifest 里为字符串；数据文件里为整数，数值一致）"
+  },
+  "generated_at": {
+   "type": "string",
+   "format": "date-time",
+   "description": "ISO8601 带时区偏移"
+  },
+  "dataset": {
+   "enum": [
+    "cards",
+    "echoes"
+   ],
+   "description": "本 manifest 所属模块；决定 counts/coverage 的形态与 schema 子集"
+  },
+  "counts": {
+   "description": "主数据实体条数注册表（取代旧混合 manifest 的 datasets 注册表）：cards 模块=卡数；echoes 模块=回响/图鉴角色/词缀数。图片张数不在此（见 coverage）",
+   "oneOf": [
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["cards"],
+     "properties": {
+      "cards": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "cards.json 主实体（魔咒书卡）条数"
       }
+     }
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["echoes", "characters", "affixes"],
+     "properties": {
+      "echoes": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "echoes.json 主实体（回响）条数"
+      },
+      "characters": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "图鉴角色条数"
+      },
+      "affixes": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "词缀条数"
+      }
+     }
     }
+   ]
+  },
+  "coverage": {
+   "description": "覆盖率统计：cards 模块=旧混合 manifest coverage 的 cards 子树（去 echoes 子树）；echoes 模块=其 echoes 子树，语义原样",
+   "oneOf": [
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "cards",
+      "images",
+      "en_name",
+      "en_desc",
+      "en_quote",
+      "en_tags",
+      "en_stats",
+      "missing_images"
+     ],
+     "properties": {
+      "cards": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "images": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "images_webp": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "WebP 副本张数（可选，与 images/ 一一对应）"
+      },
+      "en_name": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "en_desc": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "en_quote": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "en_tags": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "英文标签数与中文标签数一致的卡数"
+      },
+      "en_stats": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "有英文属性面板文本（i18n.en.stats）的卡数"
+      },
+      "missing_images": {
+       "type": "array",
+       "items": {
+        "type": "integer"
+       }
+      }
+     }
+    },
+    {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "echoes",
+      "characters",
+      "affixes",
+      "icons",
+      "icons_webp",
+      "en_name",
+      "dangling_text_keys",
+      "missing_icons"
+     ],
+     "properties": {
+      "echoes": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "characters": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "affixes": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "icons": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "images/ 回响图标张数（含品质光环）"
+      },
+      "icons_webp": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "images_webp/ 张数"
+      },
+      "en_name": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "回响 i18n.en.name 非空的条数"
+      },
+      "dangling_text_keys": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "悬空语言键数（字段置 null）"
+      },
+      "missing_icons": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       },
+       "description": "寻址失败的图标源路径"
+      }
+     }
+    }
+   ]
+  },
+  "lineage": {
+   "type": "object",
+   "description": "拆分血统：本模块包取代旧混合轴的哪个 tag、数据迁自哪个仓（字段固定，不随本地状态推导）",
+   "additionalProperties": false,
+   "required": [
+    "successor_of_tag",
+    "predecessor_repo"
+   ],
+   "properties": {
+    "successor_of_tag": {
+     "type": "string",
+     "const": "spellbook-v8.20261005.0",
+     "description": "旧混合轴（/）最后一个发布 tag"
+    },
+    "predecessor_repo": {
+     "type": "string",
+     "const": "/",
+     "description": "拆分前的数据仓"
+    }
+   }
+  },
+  "locales": {
+   "type": "array",
+   "minItems": 1,
+   "uniqueItems": true,
+   "items": {
+    "enum": [
+     "zh",
+     "en"
+    ]
+   }
+  },
+  "face_attrs": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string"
+   },
+   "description": "（cards 模块）魔咒书详情页卡面头显属性名集合（当前 hp/damage/shield/duration）：levels 行 attr_name ∈ face_attrs 即渲染为卡面大数字；与 levels.battle_show（悬停面板口径）互不相干。同字段镜像于 cards.json 顶层"
+  },
+  "image_spec": {
+   "type": "string",
+   "description": "图片规格说明（cards=375x500 卡面；echoes=回响图标/品质光环），图片一律在 images/"
+  },
+  "webp_images": {
+   "type": "string",
+   "description": "WebP 副本集目录（相对本 manifest，如 images_webp/，尾斜杠结尾）。缺省表示本包无 WebP 副本"
+  },
+  "webp_spec": {
+   "type": "string",
+   "description": "WebP 副本规格说明（可选，随 webp_images 一起出现）"
+  },
+  "frame_spec": {
+   "type": "string",
+   "description": "（cards 模块）品质边框（书页正框）规格说明；文件/尺寸/内窗矩形见 cards.json 顶层 frames"
+  },
+  "source": {
+   "type": "object",
+   "description": "附加说明，自由结构",
+   "additionalProperties": {
+    "type": [
+     "string",
+     "array"
+    ],
+    "items": {
+     "type": "string"
+    }
+   }
+  },
+  "notes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
   }
+ },
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "dataset": {
+      "const": "cards"
+     }
+    },
+    "required": ["dataset"]
+   },
+   "then": {
+    "required": ["face_attrs"],
+    "properties": {
+     "counts": {
+      "required": ["cards"]
+     },
+     "coverage": {
+      "required": ["cards"]
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "dataset": {
+      "const": "echoes"
+     }
+    },
+    "required": ["dataset"]
+   },
+   "then": {
+    "properties": {
+     "counts": {
+      "required": ["echoes"]
+     },
+     "coverage": {
+      "required": ["echoes"]
+     }
+    }
+   }
+  }
+ ]
 }

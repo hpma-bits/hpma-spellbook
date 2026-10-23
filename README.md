@@ -12,16 +12,19 @@
 
 | 模块 | 数据集 | 内容 | 条数 | 版本轴 | 当前版本 |
 |---|---|---|---|---|---|
-| `cards/` | `cards.json` | 魔咒书卡牌：141 张卡（双语 name/desc/quote/tags/stats + 逐级数值）+ 卡面 `images/`/`images_webp/` + 品质边框 `frames/` | 141 | `cards-v{S}.{D}.0` | v1.20261005.0（首发） |
-| `echoes/` | `echoes.json` | 回响：184 回响 / 46 图鉴角色 / 270 词缀 + 属性分组、成长、经济、卡牌适配权重、品质光环 + 图标 `images/`/`images_webp/` | 184 | `echoes-v{S}.{D}.0` | v1.20261005.0（首发） |
+| `cards/` | `cards.json` | 魔咒书卡牌：141 张卡（双语 name/desc/quote/tags/stats + 逐级数值）+ 卡面 `images/`/`images_webp/` + 品质边框 `frames/` | 141 | `cards-v{S}.{D}.0` | 种子 = v8 血统（20261005），首发待链重跑 |
+| `echoes/` | `echoes.json` | 回响：184 回响 / 46 图鉴角色 / 270 词缀 + 属性分组、成长、经济、卡牌适配权重、品质光环 + 图标 `images/`/`images_webp/` | 184 | `echoes-v{S}.{D}.0` | 种子 = v8 血统（20261005），首发待链重跑 |
 
 - 两模块**平级**，各自独立的 `(schema_version, data_version)` 轴：echoes 热更加内容不牵连 cards，反之亦然。
 - 发布版本 = `{schema_version}.{data_version}.0`，tag = `cards-v{ver}` / `echoes-v{ver}`；热更加内容只动 `data_version`（YYYYMMDD），结构变更（消费端要改代码）才 +1 `schema_version`。
 - 打 tag / 建远端 / 发 release 属**发布动作**，须过核对页并经用户确认。
 
-### 版本两条轴（首发特有，务必分清）
+### 版本两条轴（务必分清）
 
-- **数据文件内嵌的 `schema_version` = 8（数据自身契约）**：首发数据零变更，`cards.json` / `echoes.json` 内嵌版本保持原值，由各自 `schema/*.schema.json` 描述。
+- **数据文件内嵌的 `schema_version`（数据自身契约）**：由各自 `schema/*.schema.json` 描述，与模块 manifest 的版本轴互不相干。
+
+### 当前状态：种子（未发布）
+
 
 
 - 本仓**首发 = 该版本原样重组**为 cards / echoes 两模块，数据零变更；**唯一差异 = 图片目录改名 `images/` 及其引发的路径字段重写**：

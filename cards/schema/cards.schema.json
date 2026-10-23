@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/spellbook/schema/cards.schema.json",
-  "title": "HPMA 魔咒书 web 数据包 cards.json",
-  "description": " 产出的 141 张魔咒书卡数据契约；双语文案嵌套在 i18n，数值成长在 levels。v2 (2026-10-01)：levels 条目新增可选 unit（ 多单位分段），i18n desc 拼入  补充规则段。v3 (2026-10-01)：i18n 双语补全——zh/en 增 tags、en 增 stats；levels 条目增可选 k_en/unit_en 英文对译（）。v4 (2026-10-01)：显示名改查游戏表（），稀有度枚举码跟游戏词改名 forbidden→dark、brilliant→mythic（破坏性变更）。v5 (2026-10-02)：卡面统一 375x500 RGBA；新增顶层 frames 品质边框素材表（rarity→帧文件/尺寸/内窗 inner 矩形，书页正框——卡面填满 inner 后叠加框图）。v6 (2026-10-04)：levels 条目重构为 {battle_show?, rows}，rows 与游戏 . 逐行 1:1；行增 attr_name（ 属性名，locale 无关稳定标识）；删除 pct（v1 起的命名事故：把 battle_show 按 0-based 误读为卡面头显，数据实证 battle_show 为 1-based 且属悬停面板口径）；卡面头显改由顶层 face_attrs + 行 attr_name 命中判定（破坏性变更）。v7 (2026-10-05)：数据包新增平行数据集 echoes（回响，独立文件 echoes.json + echo_images/，契约见 echoes.schema.json）；本文件只约束 cards.json，cards 部分结构与 v6 完全一致，schema_version 随包整体升为 7（单轴版本契约）。v8 (2026-10-05)：echoes.json 增 deck/rarity_backgrounds 字段（见 echoes.schema.json），cards.json 结构不变，schema_version 随包整体升为 8。",
+  "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/schema/cards.schema.json",
+  "title": "HPMA spellbook 数据包 cards 模块 cards.json",
+  "description": " 产出的 141 张魔咒书卡数据契约；双语文案嵌套在 i18n，数值成长在 levels。2026-10 拆分：旧混合单轴包（spellbook-v8.x，cards+echoes 同包）退役，cards 成为 hpma-bits/hpma-spellbook 仓的独立模块，schema_version 从 1 重起（不继承旧混合轴的 8），本文件只约束 cards.json。结构演进史（旧混合轴）：v2 (2026-10-01)：levels 条目新增可选 unit（ 多单位分段），i18n desc 拼入  补充规则段。v3 (2026-10-01)：i18n 双语补全——zh/en 增 tags、en 增 stats；levels 条目增可选 k_en/unit_en 英文对译（）。v4 (2026-10-01)：显示名改查游戏表（），稀有度枚举码跟游戏词改名 forbidden→dark、brilliant→mythic（破坏性变更）。v5 (2026-10-02)：卡面统一 375x500 RGBA；新增顶层 frames 品质边框素材表（rarity→帧文件/尺寸/内窗 inner 矩形，书页正框——卡面填满 inner 后叠加框图）。v6 (2026-10-04)：levels 条目重构为 {battle_show?, rows}，rows 与游戏 . 逐行 1:1；行增 attr_name（ 属性名，locale 无关稳定标识）；删除 pct（v1 起的命名事故：把 battle_show 按 0-based 误读为卡面头显，数据实证 battle_show 为 1-based 且属悬停面板口径）；卡面头显改由顶层 face_attrs + 行 attr_name 命中判定（破坏性变更）。v7/v8 (2026-10-05)：旧混合包曾加平行数据集 echoes（2026-10 拆分后独立成模块，契约见 echoes.schema.json），cards 部分结构与 v6 完全一致。",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "data_version", "generated_at", "face_attrs", "labels", "frames", "cards"],
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1, "description": "数据结构版本，字段增删导致消费端需改代码时 +1" },
-    "data_version": { "type": "integer", "minimum": 1, "description": "游戏内容刷新版本，与 manifest.json 一致" },
+    "schema_version": { "type": "integer", "minimum": 1, "description": "数据结构版本（cards 模块独立版本轴，2026-10 拆分起从 1 重起），字段增删导致消费端需改代码时 +1" },
+    "data_version": { "type": "integer", "minimum": 1, "description": "游戏内容刷新版本（日期 YYYYMMDD），数值与 manifest.json 的 data_version 字符串一致" },
     "generated_at": {
       "type": "string",
       "format": "date-time",
