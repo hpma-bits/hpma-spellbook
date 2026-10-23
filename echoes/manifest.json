@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "data_version": "20261005",
+  "dataset": "echoes",
+  "counts": {
+    "echoes": 184,
+    "characters": 46,
+    "affixes": 270,
+    "icons": 76,
+    "icons_webp": 76,
+    "en_name": 183,
+    "en_desc": 184,
+    "dangling_text_keys": 38
+  },
+  "coverage": {
+    "echoes": 184,
+    "characters": 46,
+    "affixes": 270,
+    "icons": 76,
+    "icons_webp": 76,
+    "en_name": 183,
+    "en_desc": 184,
+    "dangling_text_keys": 38,
+    "missing_icons": [
+      "4131.png",
+      "4141.png",
+      "4231.png",
+      "icon_huixiang_beila_005.png",
+      "icon_huixiang_dengbuliduo_002.png",
+      "icon_huixiang_dengbuliduo_005.png",
+      "icon_huixiang_duobi_005.png",
+      "icon_huixiang_filiwei_002.png",
+      "icon_huixiang_filiwei_005.png",
+      "icon_huixiang_haige_005.png",
+      "icon_huixiang_hali_005.png",
+      "icon_huixiang_hemin_005.png",
+      "icon_huixiang_lideer_001.png",
+      "icon_huixiang_lideer_005.png",
+      "icon_huixiang_luna_002.png",
+      "icon_huixiang_luna_005.png",
+      "icon_huixiang_nawei_005.png",
+      "icon_huixiang_niute_005.png",
+      "icon_huixiang_sineipu_005.png",
+      "icon_huixiang_weisilai_005.png",
+      "icon_huixiang_xiaotianlangxing_005.png"
+    ]
+  },
+  "lineage": {}
+}

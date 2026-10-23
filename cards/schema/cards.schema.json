@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/spellbook/schema/cards.schema.json",
+  "title": "HPMA 魔咒书 web 数据包 cards.json",
+  "description": " 产出的 141 张魔咒书卡数据契约；双语文案嵌套在 i18n，数值成长在 levels。v2 (2026-10-01)：levels 条目新增可选 unit（ 多单位分段），i18n desc 拼入  补充规则段。v3 (2026-10-01)：i18n 双语补全——zh/en 增 tags、en 增 stats；levels 条目增可选 k_en/unit_en 英文对译（）。v4 (2026-10-01)：显示名改查游戏表（），稀有度枚举码跟游戏词改名 forbidden→dark、brilliant→mythic（破坏性变更）。v5 (2026-10-02)：卡面统一 375x500 RGBA；新增顶层 frames 品质边框素材表（rarity→帧文件/尺寸/内窗 inner 矩形，书页正框——卡面填满 inner 后叠加框图）。v6 (2026-10-04)：levels 条目重构为 {battle_show?, rows}，rows 与游戏 . 逐行 1:1；行增 attr_name（ 属性名，locale 无关稳定标识）；删除 pct（v1 起的命名事故：把 battle_show 按 0-based 误读为卡面头显，数据实证 battle_show 为 1-based 且属悬停面板口径）；卡面头显改由顶层 face_attrs + 行 attr_name 命中判定（破坏性变更）。v7 (2026-10-05)：数据包新增平行数据集 echoes（回响，独立文件 echoes.json + echo_images/，契约见 echoes.schema.json）；本文件只约束 cards.json，cards 部分结构与 v6 完全一致，schema_version 随包整体升为 7（单轴版本契约）。v8 (2026-10-05)：echoes.json 增 deck/rarity_backgrounds 字段（见 echoes.schema.json），cards.json 结构不变，schema_version 随包整体升为 8。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "data_version", "generated_at", "face_attrs", "labels", "frames", "cards"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1, "description": "数据结构版本，字段增删导致消费端需改代码时 +1" },
+    "data_version": { "type": "integer", "minimum": 1, "description": "游戏内容刷新版本，与 manifest.json 一致" },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$",
+      "description": "ISO8601 带时区偏移，如 2026-09-30T23:47:10+08:00"
+    },
+    "frames": {
+      "type": "object",
+      "description": "品质边框素材表：键为稀有度枚举码，与 card.rarity 同枚举；帧图在 frames/ 目录（书页正框 208x272，框线内缩于画布——卡面 cover-fit 填满 inner 矩形后叠加框图即贴合）",
+      "propertyNames": { "enum": ["common", "rare", "epic", "legendary", "dark", "mythic"] },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "size", "inner"],
+        "properties": {
+          "file": { "type": "string", "pattern": "^frame_(common|rare|epic|legendary|dark|mythic)\\.png$", "description": "帧图文件名（frames/ 目录下）" },
+          "size": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2, "description": "帧图画布尺寸 [宽,高]" },
+          "inner": {
+            "type": "array", "minItems": 4, "maxItems": 4,
+            "description": "内窗矩形 [x,y,w,h]（帧图画布像素坐标）：卡面 cover-fit 填满该矩形（居中裁切），框图叠满整个画布",
+            "items": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "face_attrs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "魔咒书详情页卡面头显属性名集合（运行时读自游戏 ui/magic_book/page/.py 的 update_card_attribute 常量元组，当前为 hp/damage/shield/duration—— 命名空间）。判定规则：levels 行 attr_name ∈ face_attrs 即该值渲染为卡面大数字；与 levels.battle_show（悬停面板展示行）互不相干。消费端从本字段读集合，不要硬编码"
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "rarity"],
+      "properties": {
+        "type": {
+          "type": "object",
+          "required": ["spell", "summon", "companion"],
+          "propertyNames": { "enum": ["spell", "summon", "companion"] },
+          "additionalProperties": { "$ref": "#/definitions/labelText" }
+        },
+        "rarity": {
+          "type": "object",
+          "required": ["common", "rare", "epic", "legendary", "dark", "mythic"],
+          "propertyNames": { "enum": ["common", "rare", "epic", "legendary", "dark", "mythic"] },
+          "additionalProperties": { "$ref": "#/definitions/labelText" }
+        }
+      }
+    },
+    "cards": {
+      "type": "array",
+      "description": "按 id 升序",
+      "items": { "$ref": "#/definitions/card" }
+    }
+  },
+  "definitions": {
+    "labelText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "zhText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "desc", "quote", "stats", "tags"],
+      "properties": {
+        "name": { "type": ["string", "null"] },
+        "desc": { "type": ["string", "null"] },
+        "quote": { "type": ["string", "null"] },
+        "stats": { "type": ["string", "null"], "description": "属性面板文本（游戏中文原值），不是对象" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "中文标签（/2），与顶层 tags 相同" }
+      }
+    },
+    "enText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "desc", "quote", "stats", "tags"],
+      "properties": {
+        "name": { "type": ["string", "null"] },
+        "desc": { "type": ["string", "null"] },
+        "quote": { "type": ["string", "null"] },
+        "stats": { "type": ["string", "null"], "description": "属性面板英文文本（stats 的同构对译，标签经 ）" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "英文标签（EN 文本同键 /2）" }
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "rarity", "cost", "img", "spell_word", "tags", "i18n"],
+      "properties": {
+        "id": { "type": "integer" },
+        "type": { "enum": ["spell", "summon", "companion"] },
+        "rarity": { "enum": ["common", "rare", "epic", "legendary", "dark", "mythic"] },
+        "cost": { "type": ["integer", "null"], "minimum": 0, "maximum": 16, "description": "实测值域 0..16；伙伴卡为 null" },
+        "img": { "type": "string", "pattern": "^images/\\d+\\.png$", "description": "相对数据包根目录的卡面图路径" },
+        "spell_word": { "type": ["string", "null"] },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "中文标签（zh 显示用，可为空数组；英文见 i18n.en.tags）" },
+        "i18n": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["zh", "en"],
+          "properties": {
+            "zh": { "$ref": "#/definitions/zhText" },
+            "en": { "$ref": "#/definitions/enText" }
+          }
+        },
+        "levels": {
+          "type": "object",
+          "description": "键为等级数字字符串（\"1\"~\"30\"，魔咒书游戏内上限； 中 31+ 的行属其他玩法系统，不入包），值为该级 {battle_show?, rows}——rows 与游戏  逐行 1:1（不去重不丢行，数组下标 i 即  第 i 行），battle_show 的元素 b 指向 rows[b-1]",
+          "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rows"],
+            "properties": {
+              "battle_show": {
+                "type": "array",
+                "items": { "type": "integer", "minimum": 1 },
+                "description": "游戏 .battle_show 原字段： 的 1-based 行位置（数据实证：全表值 0 从未出现），消费方为悬停预览/战斗详情面板（ 等，各取至多 3 行）。原样保留，可能含越界脏值（如卡 4006 的 [3]），消费端需自行防御；省略表示该级无展示行。注意：这是悬停/战斗详情口径，不是卡面头显（后者用 face_attrs × attr_name）"
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["k", "v"],
+                  "properties": {
+                    "attr_name": { "type": "string", "description": "游戏  属性名（/.py； 行模板 attr_name 节点同名词），locale 无关的行稳定标识；未知 idx 省略。卡面头显判定 = attr_name ∈ 顶层 face_attrs" },
+                    "k": { "type": "string", "description": "属性中文显示名（；游戏内为运行时 get_lang_text 翻译，非存储字段）" },
+                    "k_en": { "type": "string", "description": "属性名英文对译（取  显示名，如 伤害→Damage）；无对译时省略" },
+                    "v": { "type": ["number", "string"], "description": " 值（数值或符号串，如 0.8、\"air&ground\"）" },
+                    "unit": { "type": "string", "description": "属性段单位名（. 衍生物/召唤物分段，如马尔福三人组的「德拉科·马尔福」「克拉布和高尔」）；单段卡无此字段" },
+                    "unit_en": { "type": "string", "description": "属性段单位名英文对译（如 德拉科·马尔福→Draco Malfoy）；无对译时省略" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
