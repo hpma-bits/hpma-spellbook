@@ -2,7 +2,7 @@
  "$schema": "http://json-schema.org/draft-07/schema#",
  "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/schema/echoes.schema.json",
  "title": "HPMA spellbook 数据包 echoes 模块 echoes.json（回响数据集 v1）",
- "description": "2026-10 拆分起为 hpma-bits/hpma-spellbook 仓与 cards 平级的独立模块（旧混合轴 v7 (2026-10-05) 起曾是同包平行数据集）。deck/rarity_backgrounds（2026-10-05 定案）：characters 增可选 deck 布尔（ 成员=卡组构筑页可选回响，实测 19 人，即玩家可见的回响总数；非 deck 的 character/family 属图鉴外/活动/强化/未投放内容）；新增可选顶层 rarity_backgrounds（四品质光环=卡组构筑页  同款 image/echo/echo_rarity/，190x190 发光烟雾光环，颜色 001灰白/002蓝/003紫/004金 = rarity 1..4——消费端把回响头像缩叠至光环中心（约 62%）即为游戏内卡组页观感，勿满铺）。与 cards 模块的区分约定：①文件级——echoes.json 独立成文，图标进本模块 images/（与 cards 模块目录不交叉，各自与数据 1:1 校验；2026-10 拆分起目录统一命名，旧 echo 前缀废除）；②ID 空间——echo id 与 card id 数字上可能交叠，消费端不得按数值范围猜类型，跨集引用一律显式字段名（character_id 指向本文件 characters，card_id/derived.cards 指向 card 表 id）；③枚举——本数据集 rarity 为 int 1..4（白/蓝/紫/金，labels 查表），与 cards 的字符串枚举码不同。文案为游戏原文（含 <color>/<link> 富文本与 \\n，消费端自行渲染或剥离）；字段为 null 表示游戏语言表无对应文案（v1 实测悬空键 38 个，如 *、 等）。不进包（v2 候选）：、、*、、、、获取途径（drop/ → reward 链）。物品 id 含义（economy.cost 内）：1216=回响晶石、1002=金币、1001=宝石。",
+ "description": "hpma-bits/hpma-spellbook 数据仓 echoes 模块主数据文件：184 条回响 + 46 名图鉴角色 + 词缀/成长/经济/适配权重。deck/rarity_backgrounds：characters 增可选 deck 布尔（实测 19 人=玩家可见的回响总数；非 deck 的 character/family 属图鉴外/活动/强化/未投放内容）；可选顶层 rarity_backgrounds（四品质光环，190x190 发光烟雾光环，颜色 001灰白/002蓝/003紫/004金 = rarity 1..4——消费端把回响头像缩叠至光环中心（约 62%）即为卡组页观感，勿满铺）。与 cards 模块的区分约定：①文件级——echoes.json 独立成文，图标进本模块 images/（与 cards 模块目录不交叉，各自与数据 1:1 校验）；②ID 空间——echo id 与 card id 数字上可能交叠，消费端不得按数值范围猜类型，跨集引用一律显式字段名（character_id 指向本文件 characters，card_id/derived.cards 指向 cards 模块的 card id）；③枚举——本数据集 rarity 为 int 1..4（白/蓝/紫/金，labels 查表），与 cards 的字符串枚举码不同。文案含 <color>/<link> 富文本与 \\n，消费端自行渲染或剥离；字段为 null 表示无对应文案（v1 实测悬空键 38 个）。物品 id 含义（economy.cost 内）：1216=回响晶石、1002=金币、1001=宝石。",
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -24,12 +24,12 @@
   "schema_version": {
    "type": "integer",
    "minimum": 1,
-   "description": "数据结构版本（echoes 模块独立版本轴，2026-10 拆分起从 1 重起，与 manifest 一致）"
+   "description": "数据结构版本（与 manifest 一致）"
   },
   "data_version": {
    "type": "integer",
    "minimum": 1,
-   "description": "游戏内容刷新版本（日期 YYYYMMDD），数值与 manifest.json 的 data_version 字符串一致"
+   "description": "内容刷新版本（日期 YYYYMMDD），数值与 manifest.json 的 data_version 字符串一致"
   },
   "generated_at": {
    "type": "string",
@@ -47,7 +47,7 @@
    "properties": {
     "rarity": {
      "type": "object",
-     "description": "回响品质显示名，键为 rarity int 的字符串形式；1..4 = 白/蓝/紫/金（reward 表监控项「回响-白/蓝/…」同词）",
+     "description": "回响品质显示名，键为 rarity int 的字符串形式；1..4 = 白/蓝/紫/金",
      "propertyNames": {
       "enum": [
        "1",
@@ -62,7 +62,7 @@
     },
     "buff_types": {
      "type": "object",
-     "description": "buff_effect.type 语义解码（combat_logic/buff/Effect_<type>.py 处理器）：doc=类文档（中文机制说明），params=extra_params 逐位参数名（取自 init_from_table/__init__ 的 NAMES，可能与实际参数位有出入，消费方按序对位参考）",
+     "description": "效果类型语义解码：doc=机制说明，params=extra_params 逐位参数名（可能与实际参数位有出入，消费方按序对位参考）",
      "additionalProperties": {
       "type": [
        "object",
@@ -93,35 +93,35 @@
   },
   "characters": {
    "type": "array",
-   "description": "回响图鉴角色层（ 表，46 行；101001/201001 等为游戏内重复条目，原样保留）。按 id 升序",
+   "description": "回响图鉴角色层（46 行；101001/201001 等为重复条目，原样保留）。按 id 升序",
    "items": {
     "$ref": "#/definitions/character"
    }
   },
   "echoes": {
    "type": "array",
-   "description": "回响本体（ 表 184 行 = 45 角色 × rarity 1..4，韦斯莱双子/多比等少数角色例外多档）。按 id 升序",
+   "description": "回响本体（184 行 = 45 角色 × rarity 1..4，韦斯莱双子/多比等少数角色例外多档）。按 id 升序",
    "items": {
     "$ref": "#/definitions/echo"
    }
   },
   "attribute_groups": {
    "type": "array",
-   "description": "词条抽取/洗练分组（ 表 409 行）：entries=可抽到的 echo 属性条目 id，weights=同序权重。card_attrs 非空者为「按卡牌稀有度×等级」的属性条目分组",
+   "description": "词条抽取/洗练分组（409 行）：entries=可抽到的回响属性条目 id，weights=同序权重。card_attrs 非空者为「按卡牌稀有度×等级」的属性条目分组",
    "items": {
     "$ref": "#/definitions/attributeGroup"
    }
   },
   "affixes": {
    "type": "array",
-   "description": "回响词缀库（ 270 行，(type, level) 唯一；name 含 【PVE】/【PVP】 前缀）。effects 为 affix_ids →  内联的战斗效果；游戏内存在 1 个悬空 id（3003），悬空时该条 effects 为空数组",
+   "description": "回响词缀库（270 行，(type, level) 唯一；name 含 【PVE】/【PVP】 前缀）。effects 为内联的战斗效果；存在 1 个悬空 id（3003），悬空时该条 effects 为空数组",
    "items": {
     "$ref": "#/definitions/affix"
    }
   },
   "growth": {
    "type": "object",
-   "description": "成长轴（ + ，键 (rarity, level)）：rarity → 该品质的升级列表（1→7 级、2→10、3→13、4→16）。affix_ids 为游戏 .attr 原值——元素是  id 或 buff 表 id（本包不含 buff 内容，保持原 id）；pass_facter 为通关/喂养转化系数，card_level2_rate 为 2 级卡关联属性出现率",
+   "description": "成长轴（键 (rarity, level)）：rarity → 该品质的升级列表（1→7 级、2→10、3→13、4→16）。affix_ids 元素为词条效果 id 或 buff id（本包不含 buff 内容，保持原 id）；pass_facter 为通关/喂养转化系数，card_level2_rate 为 2 级卡关联属性出现率",
    "propertyNames": {
     "enum": [
      "1",
@@ -151,7 +151,7 @@
    "properties": {
     "recycle": {
      "type": "array",
-     "description": "分解所得（，(rarity, level) 全轴）",
+     "description": "分解所得（(rarity, level) 全轴）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -177,7 +177,7 @@
     },
     "rarity_change": {
      "type": "array",
-     "description": "品质升阶（，键 (from, to)）：rate=成功率（千分比，0=游戏内不可用占位）",
+     "description": "品质升阶（键 (from, to)）：rate=成功率（千分比，0=不可用占位）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -207,7 +207,7 @@
     },
     "reset_cost": {
      "type": "array",
-     "description": "词条重置消耗（，键 (rarity, 第几次)）",
+     "description": "词条重置消耗（键 (rarity, 第几次)）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -232,7 +232,7 @@
     },
     "reset_unlock": {
      "type": "array",
-     "description": "重置槽位解锁消耗（，键 (rarity, 槽位序号)；2026-10 实测数量全 0=当前免费，仅保留晶石通道字段）",
+     "description": "重置槽位解锁消耗（键 (rarity, 槽位序号)；实测数量全 0=当前免费，仅保留晶石通道字段）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -262,7 +262,7 @@
     },
     "reset_max": {
      "type": "array",
-     "description": "重置规则档位（）：按属性槽位数分档给重置次数上限与额外词条等级上限（addition_level）",
+     "description": "重置规则档位：按属性槽位数分档给重置次数上限与额外词条等级上限（addition_level）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -298,7 +298,7 @@
   },
   "card_echo_scores": {
    "type": "array",
-   "description": "卡牌 × 回响角色适配权重（ 表 139 行，键=card 表卡牌 id）：scores 键为  id（字符串），值基准 100、越大游戏推荐度越高。覆盖 139 张卡（含魔咒书 141 张之外的卡，name_zh 取游戏内注释名）",
+   "description": "卡牌 × 回响角色适配权重（139 行，键=card id）：scores 键为图鉴角色 id（字符串），值基准 100、越大推荐度越高。覆盖 139 张卡（含魔咒书 141 张之外的卡，name_zh 取注释名）",
    "items": {
     "type": "object",
     "additionalProperties": false,
@@ -310,14 +310,14 @@
     "properties": {
      "card_id": {
       "type": "integer",
-      "description": "card 表卡牌 id（非 echo id）"
+      "description": "卡牌 id（非 echo id）"
      },
      "name_zh": {
       "type": [
        "string",
        "null"
       ],
-      "description": "游戏内注释的中文卡名"
+      "description": "注释中文卡名"
      },
      "scores": {
       "type": "object",
@@ -333,7 +333,7 @@
   },
   "rarity_backgrounds": {
    "type": "object",
-   "description": "四品质光环（可选）：键为 rarity int 的字符串形式，值为 images/ 内的文件。卡组构筑页  同款 image/echo/echo_rarity/（190x190 发光烟雾光环，001灰白/002蓝/003紫/004金 = rarity 1..4）；消费端把回响头像缩叠至光环中心（约 62%，勿满铺）即为游戏内观感。光环缺失时该品质缺省",
+   "description": "四品质光环（可选）：键为 rarity int 的字符串形式，值为 images/ 内的文件。190x190 发光烟雾光环，001灰白/002蓝/003紫/004金 = rarity 1..4；消费端把回响头像缩叠至光环中心（约 62%，勿满铺）。光环缺失时该品质缺省",
    "propertyNames": {
     "enum": [
      "1",
@@ -348,7 +348,7 @@
    }
   },
   "buffs": {
-   "description": "回响效果 buff 链（2026-10-07 定案入包：品质间真正数值差异在 buff_effect.extra_params，如格林德沃 0.2 vs 金 0.25、邓布利多精炼阈值 14/13/12/11）。buffs = attrs.buff_ids → buff 行（group_id/effect_id1/effect_id2），effects = buff_effect 行（type/tick_time/extra_params）；extra_params 中命中键的子效果递归至多 3 层；悬空 id 记 null。资产类字段（图标/音效）不入包",
+   "description": "回响效果 buff 链：品质间真正数值差异在 effects[].extra_params（如格林德沃 0.2 vs 金 0.25、邓布利多精炼阈值 14/13/12/11）。buffs = 属性 buff_ids → buff 行（group_id/effect_id1/effect_id2），effects = 效果行（type/tick_time/extra_params）；extra_params 中命中键的子效果递归至多 3 层；悬空 id 记 null。资产类字段（图标/音效）不入包",
    "type": "object",
    "additionalProperties": false,
    "required": [
@@ -358,7 +358,7 @@
    "properties": {
     "buffs": {
      "type": "object",
-     "description": "键 = buff 表 id（字符串）；null = 悬空 id",
+     "description": "键 = buff id（字符串）；null = 悬空 id",
      "additionalProperties": {
       "type": [
        "object",
@@ -390,7 +390,7 @@
     },
     "effects": {
      "type": "object",
-     "description": "键 = buff_effect 表 id（字符串）；null = 悬空",
+     "description": "键 = 效果 id（字符串）；null = 悬空",
      "additionalProperties": {
       "type": [
        "object",
@@ -426,7 +426,7 @@
    }
   },
   "mode_mappings": {
-   "description": "：多模式（2V2/娱乐赛等 9 个 battle_type）回响效果覆盖表——同 buff_id 在特定模式下用不同 extra_params（邓布利多精炼阈值主模式 14 / 2V2 15）。hotfix_2v2 = finalized 脚本给金色回响（4224/4304/4034/4604）绑定的 echo_2V2_desc* 文案键",
+   "description": "多模式（2V2/娱乐赛等 9 个 battle_type）回响效果覆盖表——同 buff_id 在特定模式下用不同 extra_params（邓布利多精炼阈值主模式 14 / 2V2 15）。hotfix_2v2 = 金色回响（4224/4304/4034/4604）的 2V2 文案键绑定",
    "type": "object",
    "additionalProperties": false,
    "required": [
@@ -580,14 +580,14 @@
       "string",
       "null"
      ],
-     "description": "图鉴简介（*）"
+     "description": "图鉴简介"
     },
     "tips": {
      "type": [
       "string",
       "null"
      ],
-     "description": "搭配提示（*）"
+     "description": "搭配提示"
     },
     "tags": {
      "type": "array",
@@ -597,7 +597,7 @@
        "null"
       ]
      },
-     "description": "图鉴标签（*，30 种）"
+     "description": "图鉴标签（30 种）"
     }
    }
   },
@@ -614,18 +614,18 @@
    "properties": {
     "id": {
      "type": "integer",
-     "description": " id（1001..1046 / 1010xx / 2010xx）；echoes.character_id 指向这里"
+     "description": "图鉴角色 id（1001..1046 / 1010xx / 2010xx）；echoes.character_id 指向这里"
     },
     "key": {
      "type": [
       "string",
       "null"
      ],
-     "description": "拉丁稳定标识（源 ，如 hermione/nute）"
+     "description": "拉丁稳定标识（如 hermione/nute）"
     },
     "deck": {
      "type": "boolean",
-     "description": "卡组构筑页可选回响（ 成员，v8 起；实测 19 人=玩家可见回响总数）。缺省 = 否"
+     "description": "卡组构筑页可选回响（实测 19 人=玩家可见回响总数）。缺省 = 否"
     },
     "icon": {
      "type": [
@@ -672,14 +672,14 @@
       "string",
       "null"
      ],
-     "description": "小节标题（*）"
+     "description": "小节标题"
     },
     "items": {
      "type": "array",
      "items": {
       "type": "string"
      },
-     "description": "小节正文（*；与 title 按位置 1:1 配对，恒为单元素）"
+     "description": "小节正文（与 title 按位置 1:1 配对，恒为单元素）"
     }
    }
   },
@@ -697,17 +697,17 @@
       "string",
       "null"
      ],
-     "description": "回响全名（*，如「纳威·隆巴顿的回响」）"
+     "description": "回响全名（如「纳威·隆巴顿的回响」）"
     },
     "skill": {
      "type": [
       "string",
       "null"
      ],
-     "description": "回响技能名（*，如「隆巴顿的草药」）"
+     "description": "回响技能名（如「隆巴顿的草药」）"
     },
     "details": {
-     "description": "图鉴详情小节（2026-10-07 云游戏核对定案：titles/secs 按位置 1:1 配对——titles[k] 为第 k 小节标题（同族各品质共享），secs[k] 为本品质行该小节文案；sec 键尾号与 title 尾号无对应关系）。75/184 行有；无则 null",
+     "description": "图鉴详情小节（按位置 1:1 配对——第 k 小节标题同族各品质共享，本品质行为该小节文案）。75/184 行有；无则 null",
      "type": [
       "array",
       "null"
@@ -734,7 +734,7 @@
    "properties": {
     "id": {
      "type": "integer",
-     "description": " id（4011..430108；与 card id 空间无从属关系）"
+     "description": "回响 id（4011..430108；与 card id 空间无从属关系）"
     },
     "character_id": {
      "type": "integer",
@@ -749,7 +749,7 @@
       "null"
      ],
      "pattern": "^images/[^/]+\\.png$",
-     "description": "回响图标（随 rarity 取 icon_huixiang_<角色>_00<r>.png；寻址失败为 null 并计入 manifest.coverage.missing_icons）"
+     "description": "回响图标（images/ 内，命名 icon_huixiang_<角色>_00<r>；缺失为 null 并计入 manifest.coverage.missing_icons）"
     },
     "evolve_icon": {
      "type": [
@@ -765,7 +765,7 @@
       "null"
      ],
      "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$",
-     "description": "上架时间（put_date 字段，游戏本地时间 UTC+8；34 行有）"
+     "description": "上架时间（本地时间 UTC+8；34 行有）"
     },
     "derived": {
      "description": "卡牌强化关联（derived_cards/derived_level_max/derived_level_offset）：该回响为其 cards 内卡牌提供等级加成；32 行有，无则 null",
@@ -785,7 +785,7 @@
        "items": {
         "type": "integer"
        },
-       "description": "card 表卡牌 id 列表"
+       "description": "卡牌 id 列表"
       },
       "level_max": {
        "type": "integer"
@@ -816,7 +816,7 @@
      "items": {
       "type": "integer"
      },
-     "description": "该品质回响在战斗中挂载的效果组（buff 表 id），衔接 buffs.buffs/effects 链；原 . → .buff_ids 展平"
+     "description": "该品质回响在战斗中挂载的效果组（buff id），衔接 buffs.buffs/effects 链"
     }
    }
   },
@@ -838,7 +838,7 @@
      "items": {
       "type": "integer"
      },
-     "description": "可抽到的 echo 属性条目 id（ 键）"
+     "description": "可抽到的回响属性条目 id"
     },
     "weights": {
      "type": "array",
@@ -896,22 +896,22 @@
     },
     "name": {
      "$ref": "#/definitions/biText",
-     "description": "词缀名（*/pvp_*，含【PVE】/【PVP】前缀）"
+     "description": "词缀名（含【PVE】/【PVP】前缀）"
     },
     "trigger_type": {
      "type": "integer",
-     "description": "触发类型（游戏原值 1/2）"
+     "description": "触发类型（原值 1/2）"
     },
     "banned": {
      "type": "array",
      "items": {
       "type": "integer"
      },
-     "description": "互斥词缀（ id）；无则省略"
+     "description": "互斥词缀 id；无则省略"
     },
     "effects": {
      "type": "array",
-     "description": "战斗效果（affix_ids →  内联）",
+     "description": "战斗效果（词缀 ids 内联）",
      "items": {
       "type": "object",
       "additionalProperties": false,
@@ -925,7 +925,7 @@
          "integer",
          "null"
         ],
-        "description": "效果类型（.type）"
+        "description": "效果类型"
        },
        "params": {
         "type": "array",
@@ -960,12 +960,12 @@
     "exp": {
      "type": "integer",
      "minimum": 0,
-     "description": "升到该级所需经验（.）"
+     "description": "升到该级所需经验"
     },
     "cost_knut": {
      "type": "integer",
      "minimum": 0,
-     "description": "该级升级金币消耗（.）"
+     "description": "该级升级金币消耗"
     },
     "eaten_exp": {
      "type": "integer",
@@ -985,7 +985,7 @@
        "type": "integer"
       }
      },
-     "description": "该级获得的词条（.attr 原值： id 或 buff id）"
+     "description": "该级获得的词条（词条效果 id 或 buff id）"
     },
     "pass_facter": {
      "type": "number"

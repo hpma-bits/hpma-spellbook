@@ -2,13 +2,13 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/schema/cards.schema.json",
   "title": "HPMA spellbook 数据包 cards 模块 cards.json",
-  "description": " 产出的 141 张魔咒书卡数据契约；双语文案嵌套在 i18n，数值成长在 levels。2026-10 拆分：旧混合单轴包（spellbook-v8.x，cards+echoes 同包）退役，cards 成为 hpma-bits/hpma-spellbook 仓的独立模块，schema_version 从 1 重起（不继承旧混合轴的 8），本文件只约束 cards.json。结构演进史（旧混合轴）：v2 (2026-10-01)：levels 条目新增可选 unit（ 多单位分段），i18n desc 拼入  补充规则段。v3 (2026-10-01)：i18n 双语补全——zh/en 增 tags、en 增 stats；levels 条目增可选 k_en/unit_en 英文对译（）。v4 (2026-10-01)：显示名改查游戏表（），稀有度枚举码跟游戏词改名 forbidden→dark、brilliant→mythic（破坏性变更）。v5 (2026-10-02)：卡面统一 375x500 RGBA；新增顶层 frames 品质边框素材表（rarity→帧文件/尺寸/内窗 inner 矩形，书页正框——卡面填满 inner 后叠加框图）。v6 (2026-10-04)：levels 条目重构为 {battle_show?, rows}，rows 与游戏 . 逐行 1:1；行增 attr_name（ 属性名，locale 无关稳定标识）；删除 pct（v1 起的命名事故：把 battle_show 按 0-based 误读为卡面头显，数据实证 battle_show 为 1-based 且属悬停面板口径）；卡面头显改由顶层 face_attrs + 行 attr_name 命中判定（破坏性变更）。v7/v8 (2026-10-05)：旧混合包曾加平行数据集 echoes（2026-10 拆分后独立成模块，契约见 echoes.schema.json），cards 部分结构与 v6 完全一致。",
+  "description": "141 张魔咒书卡数据契约；双语文案嵌套在 i18n，数值成长在 levels。顶层 labels 提供 type/rarity 显示名查表，frames 为品质边框素材表，face_attrs 为卡面头显属性名集合（消费端从本字段读集合，不要硬编码）。",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "data_version", "generated_at", "face_attrs", "labels", "frames", "cards"],
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1, "description": "数据结构版本（cards 模块独立版本轴，2026-10 拆分起从 1 重起），字段增删导致消费端需改代码时 +1" },
-    "data_version": { "type": "integer", "minimum": 1, "description": "游戏内容刷新版本（日期 YYYYMMDD），数值与 manifest.json 的 data_version 字符串一致" },
+    "schema_version": { "type": "integer", "minimum": 1, "description": "数据结构版本，字段增删导致消费端需改代码时 +1" },
+    "data_version": { "type": "integer", "minimum": 1, "description": "内容刷新版本（日期 YYYYMMDD），数值与 manifest.json 的 data_version 字符串一致" },
     "generated_at": {
       "type": "string",
       "format": "date-time",
@@ -38,7 +38,7 @@
       "type": "array",
       "minItems": 1,
       "items": { "type": "string" },
-      "description": "魔咒书详情页卡面头显属性名集合（运行时读自游戏 ui/magic_book/page/.py 的 update_card_attribute 常量元组，当前为 hp/damage/shield/duration—— 命名空间）。判定规则：levels 行 attr_name ∈ face_attrs 即该值渲染为卡面大数字；与 levels.battle_show（悬停面板展示行）互不相干。消费端从本字段读集合，不要硬编码"
+      "description": "魔咒书详情页卡面头显属性名集合（当前为 hp/damage/shield/duration）。判定规则：levels 行 attr_name ∈ face_attrs 即该值渲染为卡面大数字；与 levels.battle_show（悬停面板展示行）互不相干。消费端从本字段读集合，不要硬编码"
     },
     "labels": {
       "type": "object",
@@ -83,8 +83,8 @@
         "name": { "type": ["string", "null"] },
         "desc": { "type": ["string", "null"] },
         "quote": { "type": ["string", "null"] },
-        "stats": { "type": ["string", "null"], "description": "属性面板文本（游戏中文原值），不是对象" },
-        "tags": { "type": "array", "items": { "type": "string" }, "description": "中文标签（/2），与顶层 tags 相同" }
+        "stats": { "type": ["string", "null"], "description": "属性面板文本（中文原值），不是对象" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "中文标签，与顶层 tags 相同" }
       }
     },
     "enText": {
@@ -95,8 +95,8 @@
         "name": { "type": ["string", "null"] },
         "desc": { "type": ["string", "null"] },
         "quote": { "type": ["string", "null"] },
-        "stats": { "type": ["string", "null"], "description": "属性面板英文文本（stats 的同构对译，标签经 ）" },
-        "tags": { "type": "array", "items": { "type": "string" }, "description": "英文标签（EN 文本同键 /2）" }
+        "stats": { "type": ["string", "null"], "description": "属性面板英文文本（stats 的同构对译）" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "英文标签（与中文标签同键对译）" }
       }
     },
     "card": {
@@ -122,7 +122,7 @@
         },
         "levels": {
           "type": "object",
-          "description": "键为等级数字字符串（\"1\"~\"30\"，魔咒书游戏内上限； 中 31+ 的行属其他玩法系统，不入包），值为该级 {battle_show?, rows}——rows 与游戏  逐行 1:1（不去重不丢行，数组下标 i 即  第 i 行），battle_show 的元素 b 指向 rows[b-1]",
+          "description": "键为等级数字字符串（\"1\"~\"30\"，魔咒书收录上限；31+ 的属性行属其他玩法系统，不入包），值为该级 {battle_show?, rows}——rows 为原值行逐行 1:1（不去重不丢行），battle_show 的元素 b 指向 rows[b-1]",
           "propertyNames": { "pattern": "^[1-9][0-9]*$" },
           "additionalProperties": {
             "type": "object",
@@ -132,7 +132,7 @@
               "battle_show": {
                 "type": "array",
                 "items": { "type": "integer", "minimum": 1 },
-                "description": "游戏 .battle_show 原字段： 的 1-based 行位置（数据实证：全表值 0 从未出现），消费方为悬停预览/战斗详情面板（ 等，各取至多 3 行）。原样保留，可能含越界脏值（如卡 4006 的 [3]），消费端需自行防御；省略表示该级无展示行。注意：这是悬停/战斗详情口径，不是卡面头显（后者用 face_attrs × attr_name）"
+                "description": "1-based 行位置（b 即 rows[b-1]），消费方为悬停预览/战斗详情面板（各取至多 3 行）。原样保留，可能含越界脏值（如卡 4006 的 [3]），消费端需自行防御；省略表示该级无展示行。注意：这是悬停/战斗详情口径，不是卡面头显（后者用 face_attrs × attr_name）"
               },
               "rows": {
                 "type": "array",
@@ -141,11 +141,11 @@
                   "additionalProperties": false,
                   "required": ["k", "v"],
                   "properties": {
-                    "attr_name": { "type": "string", "description": "游戏  属性名（/.py； 行模板 attr_name 节点同名词），locale 无关的行稳定标识；未知 idx 省略。卡面头显判定 = attr_name ∈ 顶层 face_attrs" },
-                    "k": { "type": "string", "description": "属性中文显示名（；游戏内为运行时 get_lang_text 翻译，非存储字段）" },
-                    "k_en": { "type": "string", "description": "属性名英文对译（取  显示名，如 伤害→Damage）；无对译时省略" },
-                    "v": { "type": ["number", "string"], "description": " 值（数值或符号串，如 0.8、\"air&ground\"）" },
-                    "unit": { "type": "string", "description": "属性段单位名（. 衍生物/召唤物分段，如马尔福三人组的「德拉科·马尔福」「克拉布和高尔」）；单段卡无此字段" },
+                    "attr_name": { "type": "string", "description": "英文属性名，locale 无关的行稳定标识；未知值省略。卡面头显判定 = attr_name ∈ 顶层 face_attrs" },
+                    "k": { "type": "string", "description": "属性中文显示名" },
+                    "k_en": { "type": "string", "description": "属性名英文对译（如 伤害→Damage）；无对译时省略" },
+                    "v": { "type": ["number", "string"], "description": "值（数值或符号串，如 0.8、\"air&ground\"）" },
+                    "unit": { "type": "string", "description": "属性段单位名（多单位分段，如马尔福三人组的「德拉科·马尔福」「克拉布和高尔」）；单段卡无此字段" },
                     "unit_en": { "type": "string", "description": "属性段单位名英文对译（如 德拉科·马尔福→Draco Malfoy）；无对译时省略" }
                   }
                 }

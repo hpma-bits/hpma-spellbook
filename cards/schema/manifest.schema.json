@@ -2,7 +2,7 @@
  "$schema": "http://json-schema.org/draft-07/schema#",
  "$id": "https://raw.githubusercontent.com/hpma-bits/hpma-spellbook/main/schema/manifest.schema.json",
  "title": "HPMA spellbook 数据包模块级 manifest.json（cards / echoes 共用同一份 schema）",
- "description": "2026-10 拆分契约：旧混合单轴包（spellbook-v8.x，cards+echoes 同包同轴）退役，hpma-bits/hpma-spellbook 仓改为 cards / echoes 两个平级模块，各自独立版本轴与 manifest。本文件约束任一模块目录下的 manifest.json：schema_version 从拆分起从 1 重起（不继承旧混合轴的 8）；data_version 为日期字符串 YYYYMMDD（数据文件内仍为整数）；counts=数据文件主实体条数注册表（取代旧 datasets 注册表）；coverage=旧混合 manifest coverage 的本模块子树，语义原样发布 tag = cards-v{schema}.{data}.0 / echoes-v{schema}.{data}.0。",
+ "description": "约束任一模块目录下的 manifest.json：schema_version 为数据结构版本；data_version 为日期字符串 YYYYMMDD（数据文件内仍为整数）；counts=数据文件主实体条数注册表；coverage=覆盖率统计。发布 tag = cards-v{schema}.{data}.0 / echoes-v{schema}.{data}.0。",
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -11,19 +11,18 @@
   "generated_at",
   "dataset",
   "counts",
-  "coverage",
-  "lineage"
+  "coverage"
  ],
  "properties": {
   "schema_version": {
    "type": "integer",
    "minimum": 1,
-   "description": "数据结构版本（模块独立版本轴，拆分起从 1 重起），与该模块数据文件一致"
+   "description": "数据结构版本，与该模块数据文件一致"
   },
   "data_version": {
    "type": "string",
    "pattern": "^\\d{8}$",
-   "description": "游戏内容刷新版本，日期 YYYYMMDD（manifest 里为字符串；数据文件里为整数，数值一致）"
+   "description": "内容刷新版本，日期 YYYYMMDD（manifest 里为字符串；数据文件里为整数，数值一致）"
   },
   "generated_at": {
    "type": "string",
@@ -38,7 +37,7 @@
    "description": "本 manifest 所属模块；决定 counts/coverage 的形态与 schema 子集"
   },
   "counts": {
-   "description": "主数据实体条数注册表（取代旧混合 manifest 的 datasets 注册表）：cards 模块=卡数；echoes 模块=回响/图鉴角色/词缀数。图片张数不在此（见 coverage）",
+   "description": "主数据实体条数注册表：cards 模块=卡数；echoes 模块=回响/图鉴角色/词缀数。图片张数不在此（见 coverage）",
    "oneOf": [
     {
      "type": "object",
@@ -77,7 +76,7 @@
    ]
   },
   "coverage": {
-   "description": "覆盖率统计：cards 模块=旧混合 manifest coverage 的 cards 子树（去 echoes 子树）；echoes 模块=其 echoes 子树，语义原样",
+   "description": "覆盖率统计：cards 模块=卡数/图片/英文字段覆盖；echoes 模块=回响/图标/悬空键等",
    "oneOf": [
     {
      "type": "object",
@@ -187,32 +186,11 @@
        "items": {
         "type": "string"
        },
-       "description": "寻址失败的图标源路径"
+       "description": "缺失图标列表（不含文件内容）"
       }
      }
     }
    ]
-  },
-  "lineage": {
-   "type": "object",
-   "description": "拆分血统：本模块包取代旧混合轴的哪个 tag、数据迁自哪个仓（字段固定，不随本地状态推导）",
-   "additionalProperties": false,
-   "required": [
-    "successor_of_tag",
-    "predecessor_repo"
-   ],
-   "properties": {
-    "successor_of_tag": {
-     "type": "string",
-     "const": "spellbook-v8.20261005.0",
-     "description": "旧混合轴（/）最后一个发布 tag"
-    },
-    "predecessor_repo": {
-     "type": "string",
-     "const": "/",
-     "description": "拆分前的数据仓"
-    }
-   }
   },
   "locales": {
    "type": "array",
@@ -248,19 +226,6 @@
   "frame_spec": {
    "type": "string",
    "description": "（cards 模块）品质边框（书页正框）规格说明；文件/尺寸/内窗矩形见 cards.json 顶层 frames"
-  },
-  "source": {
-   "type": "object",
-   "description": "附加说明，自由结构",
-   "additionalProperties": {
-    "type": [
-     "string",
-     "array"
-    ],
-    "items": {
-     "type": "string"
-    }
-   }
   },
   "notes": {
    "type": "array",
